@@ -105,7 +105,7 @@ class Roost(messages.SnipeBackend):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.messages = []
-        self.r = _rooster.Rooster(self.url, self.service_name)
+        self.r = _rooster.Rooster(self.url, self.service_name, self.realm)
         self.chunksize = 128
         self.loaded = False
         self.backfilling = False

@@ -67,7 +67,7 @@ class RoosterReconnectException(RoosterException):
 
 
 class Rooster(util.HTTP_JSONmixin):
-    def __init__(self, url, service):
+    def __init__(self, url, service, realm):
         self.token = None
         self.url = url
         if self.url[-1] == '/':
@@ -75,6 +75,7 @@ class Rooster(util.HTTP_JSONmixin):
             self.url = self.url[:-1]
         self.inservice = service
         self.service = None
+        self.realm = realm
         self.principal = None
         self.ctx = None
         self.ccache = None
@@ -83,7 +84,7 @@ class Rooster(util.HTTP_JSONmixin):
         self.setup_client_session()
 
     async def credentials(self):
-        return await imbroglio.run_in_thread(get_zephyr_creds)
+        return await imbroglio.run_in_thread(get_zephyr_creds, self.realm)
 
     async def auth(self, create_user=False):
         hostname = urllib.parse.urlparse(self.url).hostname
@@ -308,11 +309,10 @@ def get_auth_token(service):
     return princ_str.decode('utf-8'), base64.b64encode(token).decode('ascii')
 
 
-def get_zephyr_creds():
-    # XXX hardcoded ATHENA.MIT.EDU
+def get_zephyr_creds(realm):
     context = krb5.Context()
     ccache = context.cc_default()
     principal = ccache.get_principal()
-    zephyr = context.build_principal('ATHENA.MIT.EDU', ['zephyr', 'zephyr'])
+    zephyr = context.build_principal(realm, ['zephyr', 'zephyr'])
     creds = ccache.get_credentials(principal, zephyr)
     return creds.to_dict()
