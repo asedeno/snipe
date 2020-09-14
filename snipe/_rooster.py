@@ -70,9 +70,6 @@ class Rooster(util.HTTP_JSONmixin):
     def __init__(self, url, service, realm):
         self.token = None
         self.url = url
-        if self.url[-1] == '/':
-            # strip _1_ trailing /
-            self.url = self.url[:-1]
         self.inservice = service
         self.service = None
         self.realm = realm
@@ -98,7 +95,7 @@ class Rooster(util.HTTP_JSONmixin):
             get_auth_token, self.service)
 
         result = await self._post_json(
-            '/v1/auth',
+            './v1/auth',
             principal=self.principal,
             token=token,
             createUser=create_user,
@@ -115,23 +112,23 @@ class Rooster(util.HTTP_JSONmixin):
 
     async def get_info(self):
         await self.ensure_auth()
-        return (await self._get('/v1/info'))
+        return (await self._get('./v1/info'))
 
     async def send(self, message):
         await self.ensure_auth()
         return (await self._post_json(
-            '/v1/zwrite',
+            './v1/zwrite',
             message=message,
             credentials=(await self.credentials()),
             ))
 
     async def ping(self):
         await self.ensure_auth()
-        return (await self._get('/v1/ping'))
+        return (await self._get('./v1/ping'))
 
     async def subscriptions(self):
         await self.ensure_auth()
-        return (await self._get('/v1/subscriptions'))
+        return (await self._get('./v1/subscriptions'))
 
     @staticmethod
     def triplet_to_dict(triplet):
@@ -146,7 +143,7 @@ class Rooster(util.HTTP_JSONmixin):
         await self.ensure_auth()
 
         return (await self._post_json(
-            '/v1/subscribe',
+            './v1/subscribe',
             subscriptions=[self.triplet_to_dict(triplet) for triplet in subs],
             credentials=(await self.credentials()),
             ))
@@ -164,7 +161,7 @@ class Rooster(util.HTTP_JSONmixin):
         for triplet in subs:
             triplet_dict = self.triplet_to_dict(triplet)
             result = (await self._post_json(
-                '/v1/unsubscribe',
+                './v1/unsubscribe',
                 subscription=triplet_dict,
                 credentials=(await self.credentials()),
                 ))
@@ -173,16 +170,16 @@ class Rooster(util.HTTP_JSONmixin):
 
     async def check_zephyrcreds(self):
         await self.ensure_auth()
-        return (await self._get('/v1/zephyrcreds'))
+        return (await self._get('./v1/zephyrcreds'))
 
     async def renew_zephyrcreds(self):
         await self.ensure_auth()
         return (await self._post_json(
-            '/v1/zephyrcreds', credentials=self.zephyr_creds()))
+            './v1/zephyrcreds', credentials=self.zephyr_creds()))
 
     async def bytime(self, t):
         await self.ensure_auth()
-        return (await self._post_json('/v1/bytime', t=t))
+        return (await self._post_json('./v1/bytime', t=t))
 
     async def messages(self, offset, limit, reverse=True, inclusive=False):
         await self.ensure_auth()
@@ -191,7 +188,7 @@ class Rooster(util.HTTP_JSONmixin):
             offset = ''
 
         return (await self._get(
-            '/v1/messages',
+            './v1/messages',
             reverse=1 if reverse else 0,
             inclusive=1 if inclusive else 0,
             offset=offset,
@@ -214,7 +211,7 @@ class Rooster(util.HTTP_JSONmixin):
 
         try:
             try:
-                await ws.connect(self.url + '/v1/socket/websocket')
+                await ws.connect(urllib.parse.urljoin(self.url, './v1/socket/websocket'))
             except OSError as e:
                 self.log.debug('error connecting')
                 raise RoosterReconnectException(str(e), wait=5) from e
