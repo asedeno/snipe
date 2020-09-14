@@ -321,7 +321,11 @@ class Roost(messages.SnipeBackend):
 
         msgid = None
         if self.messages:
-            msgid = self.messages[0].data.get('id')
+            for msg in self.messages:
+                if not isinstance(msg, RoostMessage):
+                    continue
+                msgid = msg.data.get('id')
+                break
             if origin is None:
                 origin = filledpoint
 
