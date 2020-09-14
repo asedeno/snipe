@@ -195,7 +195,7 @@ class Roost(messages.SnipeBackend):
             await self.r.auth(create_user=True)
             self.add_message(messages.SnipeMessage(self, 'Registered.'))
             await self.r.renew_zephyrcreds()
-            self.load_subs(self._zephyr_subs)
+            await self.load_subs(self._zephyr_subs)
         except imbroglio.Cancelled:
             pass
         except Exception as e:
