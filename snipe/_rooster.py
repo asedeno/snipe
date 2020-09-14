@@ -175,7 +175,7 @@ class Rooster(util.HTTP_JSONmixin):
     async def renew_zephyrcreds(self):
         await self.ensure_auth()
         return (await self._post_json(
-            './v1/zephyrcreds', credentials=self.zephyr_creds()))
+            './v1/zephyrcreds', credentials=(await self.credentials())))
 
     async def bytime(self, t):
         await self.ensure_auth()
