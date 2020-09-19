@@ -10,7 +10,7 @@ TEST=
 all check: flake8 mypy nosetests 
 
 flake8: venv
-	$(FLAKE8) rooster.py setup.py snipe.py swearing.py snipe tests
+	$(FLAKE8) rooster.py setup.py swearing.py snipe tests
 
 nosetests: venv
 	$(NOSETESTS) $(TEST)
