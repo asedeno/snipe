@@ -1,3 +1,4 @@
+PYTHON ?= python3
 VBIN=venv/bin
 FLAKE8=$(VBIN)/flake8
 NOSE=$(VBIN)/nose2
@@ -30,7 +31,7 @@ venv:	venv-stamp
 
 venv-stamp:
 	$(MAKE) venv-clean
-	python3 -m venv venv
+	$(PYTHON) -m venv venv
 	venv/bin/pip install -U pip
 	venv/bin/pip install -r ./requirements.txt
 	venv/bin/pip install mypy flake8 nose2 coverage
