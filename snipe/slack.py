@@ -518,7 +518,7 @@ class Slack(messages.SnipeBackend, util.HTTP_JSONmixin):
         try:
             self.check(response, context, *args)
         except util.SnipeException as error:
-            self.log.error(f'%s', '{error}: {response}')
+            self.log.error('%s', f'{error}: {response}')
             self.messages.append(messages.SnipeErrorMessage(
                 self,
                 str(error) + '\n' + repr(response),
