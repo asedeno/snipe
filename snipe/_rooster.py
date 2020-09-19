@@ -246,6 +246,8 @@ class Rooster(util.HTTP_JSONmixin):
                             continue
                         else:
                             raise RoosterReconnectException('ping timeout')
+                    if m is None:
+                        raise RoosterReconnectException('websocket closed')
                 except OSError as e:
                     raise RoosterReconnectException(
                         f'{e}: disconnected') from e

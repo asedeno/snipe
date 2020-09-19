@@ -434,6 +434,8 @@ class JSONWebSocket:
 
     async def read(self):
         data = await self.conn.read()
+        if data is None:
+            return None
         try:
             return json.loads(data)
         except json.decoder.JSONDecodeError as e:
@@ -956,7 +958,15 @@ class HTTP_WS:
             for event in self.ws.events():
                 self.log.debug('%s', f'{ident}readsome {event}')
                 if isinstance(event, wsproto.events.CloseConnection):
-                    await self._send(event.response())
+                    try:
+                        await self._send(event.response())
+                    except wsproto.utilities.LocalProtocolError:  # pragma: nocover  # noqa: E501
+                        self.log.debug(
+                            '%s',
+                            'ignored while closing websocket '
+                            f'connection for {self.url}',
+                            exc_info=True,
+                        )
                     if self.inbuf:  # pragma: nocover
                         self.log.error(
                             '%s',
