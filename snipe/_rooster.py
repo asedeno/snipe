@@ -211,7 +211,8 @@ class Rooster(util.HTTP_JSONmixin):
 
         try:
             try:
-                await ws.connect(urllib.parse.urljoin(self.url, './v1/socket/websocket'))
+                await ws.connect(
+                    urllib.parse.urljoin(self.url, './v1/socket/websocket'))
             except OSError as e:
                 self.log.debug('error connecting')
                 raise RoosterReconnectException(str(e), wait=5) from e
