@@ -41,6 +41,7 @@ import inspect
 import itertools
 import os
 import pwd
+import random
 import re
 import shlex
 import time
@@ -84,6 +85,9 @@ class Roost(messages.SnipeBackend):
     signature = util.Configurable(
         'roost.signature', pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
         'Name-ish field on messages')
+    signatures_file = util.Configurable(
+        'roost.signatures_file', None,
+        'File of possible signatures to use; overrides roost.signature if set')
     subunify = util.Configurable(
         'roost.subunify', False, 'un-ify subscriptions')
     FORMAT_TYPES = {'strip', 'raw', 'format', 'clear'}
@@ -219,6 +223,18 @@ class Roost(messages.SnipeBackend):
     def principal(self):
         return self.r.principal
 
+    def get_signature(self):
+        try:
+            if self.signatures_file:
+                path = os.path.expanduser(self.signatures_file)
+                if os.path.isfile(path):
+                    with open(path) as fh:
+                        lines = fh.readlines()
+                    return random.choice(lines).strip()
+        except Exception:
+            pass
+        return self.signature
+
     async def send(self, paramstr, body):
         self.log.debug('send paramstr=%s', paramstr)
 
@@ -253,7 +269,7 @@ class Roost(messages.SnipeBackend):
                 'instance': flags.get('-i', 'PERSONAL'),
                 'recipient': recipient,
                 'opcode': flags.get('-O', ''),
-                'signature': flags.get('-s', self.signature),
+                'signature': flags.get('-s', self.get_signature()),
                 'message': body,
                 }
 
