@@ -62,6 +62,13 @@ class Context:
 
     stark_file = util.Configurable('starkfile', 'starks')
 
+    indent_config = util.Configurable(
+        'config.indent',
+        False,
+        'Pretty-print the config when saving it',
+        coerce=util.coerce_bool,
+        )
+
     def __init__(self, home=None):
         self.conf = {
             'filter': {
@@ -155,9 +162,12 @@ class Context:
         return loaded
 
     def conf_write(self):
+        kwargs = {}
+        if self.indent_config:
+            kwargs['indent'] = 4
         self.ensure_directory()
         with util.safe_write(os.path.join(self.directory, 'config')) as fp:
-            json.dump(self.conf, fp)
+            json.dump(self.conf, fp, **kwargs)
             fp.write('\n')
 
     def ensure_directory(self):
