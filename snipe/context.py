@@ -41,7 +41,9 @@ import json
 import logging
 import netrc
 import os
+import pkgutil
 import subprocess
+import sys
 
 from . import imbroglio
 from . import messager
@@ -124,6 +126,20 @@ class Context:
                 ] + self.loadbackends())
 
         self.read_starks()
+        self.load_modules()
+
+    def load_modules(self):
+        modules_dir = os.path.join(self.directory, 'modules')
+        if not os.path.isdir(modules_dir):
+            return
+
+        base_mod = 'snipe.user'
+        importlib.import_module(base_mod)
+        sys.modules[base_mod].__path__ = [modules_dir]
+
+        for _, module_name, _ in pkgutil.walk_packages(
+                [modules_dir], prefix='.'):
+            importlib.import_module(module_name, base_mod)
 
     async def start(self, ui):
         self.ui = ui
