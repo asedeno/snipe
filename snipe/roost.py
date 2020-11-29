@@ -230,7 +230,10 @@ class Roost(messages.SnipeBackend):
                 if os.path.isfile(path):
                     with open(path) as fh:
                         lines = fh.readlines()
-                    return random.choice(lines).strip()
+                    for count in range(10):
+                        sig = random.choice(lines).strip()
+                        if sig and sig[0] != '#':
+                            return sig
         except Exception:
             pass
         return self.signature
