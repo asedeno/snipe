@@ -466,6 +466,10 @@ class Roost(messages.SnipeBackend):
         self.log.info("Loading %d subs from %s", len(triplets), filename)
 
         for triplet in triplets:
+            if len(triplet) < 3:
+                self.log.warning("Lengthening short triplet %s", triplet)
+                while len(triplet) < 3:
+                    triplet.append('')
             if triplet[2].endswith('@' + self.realm) and triplet[2][0] in '@*':
                 triplet[2] = '*'
 
