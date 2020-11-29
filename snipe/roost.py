@@ -460,6 +460,7 @@ class Roost(messages.SnipeBackend):
         with open(filename) as fp:
             lines = fp.read().split()
         triplets = [line.split(',', 2) for line in lines]
+        self.log.info("Loading %d subs from %s", len(triplets), filename)
 
         for triplet in triplets:
             if triplet[2].endswith('@' + self.realm) and triplet[2][0] in '@*':

@@ -369,23 +369,31 @@ class HTTP_JSONmixin:
         self.log.debug(
             '_post(%s%s, %s, **%s)', repr(self.url), repr(path),
             self._JSONmixin_headers, repr(kw))
-        return await self._request(
+        result = await self._request(
             urllib.parse.urljoin(self.url, path),
             method='POST',
             data=kw if _data is None else _data,
             headers=self._JSONmixin_headers,
             )
+        self.log.debug(
+            'Completed _post(%s%s, %s, ...): result %s', repr(self.url),
+            repr(path), self._JSONmixin_headers, result)
+        return result
 
     async def _post_json(self, path, **kw):
         self.log.debug(
             '_post_json(%s%s, %s, **%s)', repr(self.url), repr(path),
             self._JSONmixin_headers, repr(kw))
-        return await self._request(
+        result = await self._request(
             urllib.parse.urljoin(self.url, path),
             'POST',
             json=kw,
             headers=self._JSONmixin_headers,
             )
+        self.log.debug(
+            'Completed _post_json(%s%s, %s, ...): result %s', repr(self.url),
+            repr(path), self._JSONmixin_headers, result)
+        return result
 
     async def _patch(self, path, **kw):
         self.log.debug(

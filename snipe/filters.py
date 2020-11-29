@@ -439,7 +439,7 @@ class FilterLookup(Filter):
             self.log.debug('%s: %s', self.filtername, text)
             return makefilter(text).simplify(d)
         except Exception:
-            self.log.exception('in filter %s', self.filtername)
+            self.log.exception('in filter %s: %s', self.filtername, text)
             return False
 
     def __eq__(self, other):
