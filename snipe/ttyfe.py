@@ -504,10 +504,12 @@ class TTYRenderer:
 del makefunc
 
 
+"""Build key constant -> key name (eg, curses.KEY_HOME->"HOME") table"""
 unkey = dict(
     (getattr(curses, k), k[len('KEY_'):])
     for k in dir(curses)
     if k.startswith('KEY_'))
+"""Build key name -> key constant (eg, "HOME"->curses.KEY_HOME) table"""
 key = dict(
     (k[len('KEY_'):], getattr(curses, k))
     for k in dir(curses)
