@@ -644,7 +644,8 @@ class SSLStream:
         self.netstream = netstream
         self.incoming = ssl.MemoryBIO()
         self.outgoing = ssl.MemoryBIO()
-        self.ctx = ssl.create_default_context()
+        cafile = os.environ.get('REQUESTS_CA_BUNDLE')
+        self.ctx = ssl.create_default_context(cafile=cafile)
         self.obj = self.ctx.wrap_bio(
             self.incoming, self.outgoing, server_side=False,
             server_hostname=hostname)
