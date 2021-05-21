@@ -616,6 +616,9 @@ class NetworkStream:
             sent = self.socket.send(data)
             data = data[sent:]
 
+    async def maybewrite(self):
+        pass
+
     async def close(self):
         self.log.debug('%s', f'NetworkStream {self} closing')
         with contextlib.suppress(OSError):
