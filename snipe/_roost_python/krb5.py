@@ -236,13 +236,14 @@ class Credentials(object):
             }
         addrs = []
         i = 0
-        while bool(self._handle.contents.addresses[i]):
-            addr = self._handle.contents.addresses[i].contents
-            addrs.append({
+        if bool(self._handle.contents.addresses):
+            while bool(self._handle.contents.addresses[i]):
+                addr = self._handle.contents.addresses[i].contents
+                addrs.append({
                     'addrType': addr.addrtype,
                     'address': addr.contents_as_str()
-            })
-            i += 1
+                })
+                i += 1
         if addrs:
             ret['caddr'] = addrs
 
