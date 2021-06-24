@@ -212,7 +212,9 @@ async def process_filter(cmd, inbuf):
                 stdout=outw,
                 stderr=subprocess.STDOUT) as p:
             os.close(inr)
+            inr = None
             os.close(outw)
+            outw = None
 
             await imbroglio.spawn(sender(inbuf))
             output = []
@@ -230,6 +232,16 @@ async def process_filter(cmd, inbuf):
             pass
         try:
             os.close(outr)
+        except OSError:  # pragma: nocover
+            pass
+        try:
+            if inr is not None:
+                os.close(inr)
+        except OSError:  # pragma: nocover
+            pass
+        try:
+            if outw is not None:
+                os.close(outw)
         except OSError:  # pragma: nocover
             pass
 
