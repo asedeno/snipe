@@ -599,7 +599,9 @@ class TestImbroglioTools(unittest.TestCase):
                 (0, 'FOO'),
                 (await imbroglio.process_filter(['tr', 'a-z', 'A-Z'], 'foo')))
             with self.assertRaises(FileNotFoundError):
-                await imbroglio.process_filter(['fake_command_that_will_error_out'], '')
+                await imbroglio.process_filter(
+                    ['fake_command_that_will_error_out'],
+                    '')
 
         imbroglio.run(test())
 
