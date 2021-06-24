@@ -11,17 +11,21 @@ client intended for services with persistence.  One such service is
 [zephyr](https://github.com/zephyr-im).  snipe is also has
 minimal support for [IRCCloud](https://www.irccloud.com).
 
+In-app documentation is available with `? i`, and keybindings are listed below
+and with `? b`.
+
 I've decided that supporting anything earlier than python 3.6 isn't
 worth it.
 
 M-g in the messager window requires
 [parsedatetime](https://github.com/bear/parsedatetime).
 
-It points itself at roost-api.mit.edu by default.  If you want to
-override that, you can use the roost.url config key.  At the moment,
-you need to set up subscriptions by some other means; import-subs in
-the [roost-python](https://github.com/roost-im/roost-python) repo is
-useful for this.
+It points itself at roost-api.mit.edu by default.  If you want to override
+that, you can use the roost.url config key. Subscriptions are added
+automatically when you sign up for Roost. Additionally, `R s` or `R l` sub to a
+single class or all in a file, respectively. You can also use a tool like
+import-subs in the [roost-python](https://github.com/roost-im/roost-python)
+repo.
 
 It is known that there are bugs and missing features everywhere.  I
 would mostly characterize this as "demoable" but not yet "usable".  As
@@ -99,6 +103,7 @@ Meta-g | goto an absolute time in the message window
 Meta–i | popup a window with gunk about the current message
 R S | dump zephyr (roost) subscriptions into a window
 R s | subscribe to a zephyr class
+R l | subscribe to all zephyr classes from a file (eg, ~/.zephyr.subs)
 R u | unsubscribe from a zephyr class
 
 ### "Editor" windows

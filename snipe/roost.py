@@ -230,7 +230,10 @@ class Roost(messages.SnipeBackend):
                 if os.path.isfile(path):
                     with open(path) as fh:
                         lines = fh.readlines()
-                    return random.choice(lines).strip()
+                    for count in range(10):
+                        sig = random.choice(lines).strip()
+                        if sig and sig[0] != '#':
+                            return sig
         except Exception:
             pass
         return self.signature
@@ -460,8 +463,13 @@ class Roost(messages.SnipeBackend):
         with open(filename) as fp:
             lines = fp.read().split()
         triplets = [line.split(',', 2) for line in lines]
+        self.log.info("Loading %d subs from %s", len(triplets), filename)
 
         for triplet in triplets:
+            if len(triplet) < 3:
+                self.log.warning("Lengthening short triplet %s", triplet)
+                while len(triplet) < 3:
+                    triplet.append('')
             if triplet[2].endswith('@' + self.realm) and triplet[2][0] in '@*':
                 triplet[2] = '*'
 

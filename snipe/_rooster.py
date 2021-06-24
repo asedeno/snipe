@@ -142,11 +142,24 @@ class Rooster(util.HTTP_JSONmixin):
     async def subscribe(self, subs):
         await self.ensure_auth()
 
-        return (await self._post_json(
+        results = (await self._post_json(
             './v1/subscribe',
             subscriptions=[self.triplet_to_dict(triplet) for triplet in subs],
             credentials=(await self.credentials()),
             ))
+
+        self.log.info("Subscribing to %d subs got %d results", len(subs),
+                      len(results))
+        for sub, result in zip(subs, results):
+            # If the subscription request is correct, we should just get back
+            # a bunch of records equivalent to our request, with classKey and
+            # instanceKey added. If it's bad, we'll get mostly {}, but the bad
+            # one will have more information.
+            if result and 'classKey' not in result:
+                self.log.warning("subscribe: Got result %s for sub %s",
+                                 result, sub)
+
+        return results
 
     async def unsubscribe(self, subs):
         await self.ensure_auth()

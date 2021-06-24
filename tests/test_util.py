@@ -540,7 +540,13 @@ class MockStream:
 
 
 class MockContext:
-    def __init__(self):
+    def __init__(
+            self,
+            purpose=ssl.Purpose.SERVER_AUTH,
+            cafile=None,
+            capath=None,
+            cadata=None,
+            ):
         self.read_exceptions = []
 
     def wrap_bio(self, incoming, outgoing, *, server_side, server_hostname):

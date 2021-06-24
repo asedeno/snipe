@@ -396,10 +396,13 @@ class Window:
         :param str content: The initial contents of the input
         """
 
+        completer = interactive.FileCompleter()
+        if content:
+            completer.split_and_update_dir(content)
         result = await self.read_string(
             prompt,
             content=content,
-            completer=interactive.FileCompleter(),
+            completer=completer,
             name=name,
             )
 

@@ -165,6 +165,7 @@ class FileCompleter(Completer):
     def __init__(self):
         self.live = True
         self.directory = ''
+        self.filename = ''
         self.candidates = sorted(self.listdir(self.directory))
 
     @staticmethod
@@ -177,20 +178,26 @@ class FileCompleter(Completer):
                 files[n] += os.path.sep
         return files
 
-    def matches(self, value=''):
+    def split_and_update_dir(self, value):
         directory, filename = os.path.split(value)
         if directory != self.directory:
             self.candidates = self.listdir(directory)
             self.directory = directory
+        self.filename = filename
+        return directory, filename
+
+    def matches(self, value=None):
+        if value is None:
+            directory = self.directory
+            filename = self.filename
+        else:
+            directory, filename = self.split_and_update_dir(value)
         return [
             (i, name, os.path.join(directory, name))
             for (i, name, _) in super().matches(filename)]
 
     def expand(self, value):
-        directory, filename = os.path.split(value)
-        if directory != self.directory:
-            self.candidates = self.listdir(directory)
-            self.directory = directory
+        directory, filename = self.split_and_update_dir(value)
         return os.path.join(
             directory, Completer(self.candidates).expand(filename))
 
