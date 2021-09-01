@@ -702,26 +702,26 @@ class TestHTTP(unittest.TestCase):
             self.assertEqual('<HTTP http://foo/foo <MockStream>>', repr(HTTP))
 
             self.assertEqual(
-                b'GET /foo HTTP/1.1\r\nhost: foo\r\nconnection: close\r\n'
-                b'accept-encoding: gzip\r\n\r\n',
+                b'GET /foo HTTP/1.1\r\nHost: foo\r\nConnection: close\r\n'
+                b'Accept-Encoding: gzip\r\n\r\n',
                 b''.join(HTTP.stream.wrote))
 
             HTTP = await snipe.util.HTTP.request(
                 'http://foo/foo', method='POST', log=log, json='foo')
             self.assertEqual(
-                b'POST /foo HTTP/1.1\r\nhost: foo\r\nconnection: close\r\n'
-                b'accept-encoding: gzip\r\n'
-                b'content-type: application/json\r\ncontent-length: 5\r\n\r\n'
+                b'POST /foo HTTP/1.1\r\nHost: foo\r\nConnection: close\r\n'
+                b'Accept-Encoding: gzip\r\n'
+                b'Content-Type: application/json\r\nContent-Length: 5\r\n\r\n'
                 b'"foo"',
                 b''.join(HTTP.stream.wrote))
 
             HTTP = await snipe.util.HTTP.request(
                 'http://foo/foo', method='POST', log=log, data={'bar': 'foo'})
             self.assertEqual(
-                b'POST /foo HTTP/1.1\r\nhost: foo\r\nconnection: close\r\n'
-                b'accept-encoding: gzip\r\n'
-                b'content-type: application/x-www-form-urlencoded\r\n'
-                b'content-length: 7\r\n'
+                b'POST /foo HTTP/1.1\r\nHost: foo\r\nConnection: close\r\n'
+                b'Accept-Encoding: gzip\r\n'
+                b'Content-Type: application/x-www-form-urlencoded\r\n'
+                b'Content-Length: 7\r\n'
                 b'\r\nbar=foo',
                 b''.join(HTTP.stream.wrote))
 
@@ -734,8 +734,8 @@ class TestHTTP(unittest.TestCase):
             self.assertEqual('<HTTP http://foo/foo <MockStream>>', repr(HTTP))
 
             self.assertEqual(
-                b'GET /foo HTTP/1.1\r\nhost: foo\r\nconnection: close\r\n'
-                b'accept-encoding: gzip\r\n\r\n',
+                b'GET /foo HTTP/1.1\r\nHost: foo\r\nConnection: close\r\n'
+                b'Accept-Encoding: gzip\r\n\r\n',
                 b''.join(HTTP.stream.wrote))
 
             HTTP.stream.readdata = [
@@ -770,8 +770,8 @@ class TestHTTP(unittest.TestCase):
             self.assertIsInstance(HTTP.stream, MockStream)
 
             self.assertEqual(
-                b'GET /foo HTTP/1.1\r\nhost: foo\r\nconnection: close\r\n'
-                b'accept-encoding: gzip\r\n\r\n',
+                b'GET /foo HTTP/1.1\r\nHost: foo\r\nConnection: close\r\n'
+                b'Accept-Encoding: gzip\r\n\r\n',
                 b''.join(HTTP.stream.wrote))
 
             k = zlib.compressobj(wbits=16 + zlib.MAX_WBITS)
