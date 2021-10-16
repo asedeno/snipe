@@ -108,7 +108,7 @@ class TestRoost(unittest.TestCase):
 
         with patch(
                 'snipe.imbroglio.process_filter',
-                return_value=mocks.promise((0, 'foo'))):
+                **mocks.patch_kwargs((0, 'foo'))):
             r.r.send = Mock(return_value=mocks.promise())
             await r.send('-c class -x -s sig recipient', 'body')
 
@@ -124,7 +124,7 @@ class TestRoost(unittest.TestCase):
 
         with patch(
                 'snipe.imbroglio.process_filter',
-                return_value=mocks.promise((1, 'foo'))), \
+                **mocks.patch_kwargs((1, 'foo'))), \
                 self.assertRaises(Exception):
             r.r.send = Mock(return_value=mocks.promise())
             await r.send('-c class -x -s sig recipient', 'body')
@@ -184,7 +184,7 @@ class TestRoost(unittest.TestCase):
 
         with patch(
                 'snipe.imbroglio.process_filter',
-                return_value=mocks.promise((0, 'foo\n**END**\n'))):
+                **mocks.patch_kwargs((0, 'foo\n**END**\n'))):
             m = await r.construct_and_maybe_decrypt({
                     'message': 'body',
                     'receiveTime': 0.0,
@@ -201,7 +201,7 @@ class TestRoost(unittest.TestCase):
 
         with patch(
                 'snipe.imbroglio.process_filter',
-                return_value=mocks.promise((1, 'foo\n**END**\n'))), \
+                **mocks.patch_kwargs((1, 'foo\n**END**\n'))), \
                 self.assertLogs() as l:
             m = await r.construct_and_maybe_decrypt({
                     'message': 'body',
@@ -221,7 +221,7 @@ class TestRoost(unittest.TestCase):
 
         with patch(
                 'snipe.imbroglio.process_filter',
-                return_value=mocks.promise(exception=Exception)), \
+                **mocks.patch_kwargs(exception=Exception)), \
                 self.assertLogs() as l:
             m = await r.construct_and_maybe_decrypt({
                     'message': 'body',
