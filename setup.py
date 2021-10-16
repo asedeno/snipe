@@ -30,8 +30,9 @@ roost (https://github.com/roost-im).""",
     # keep this in sync with requirements.txt
     install_requires=[
         'docutils',
+        'types-docutils',
         'h11',
-        'Markdown==2.6.7',
+        'Markdown<3.3',
         'parsedatetime',
         'ply',
         'wsproto',

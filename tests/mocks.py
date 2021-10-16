@@ -37,6 +37,7 @@ import curses
 import functools
 import itertools
 import sys
+import unittest.mock
 
 from typing import (Dict, Any, List, Optional, Tuple)
 from unittest.mock import (patch)
@@ -456,3 +457,18 @@ def promise(val=None, exception=None):
         return val
 
     return f()
+
+
+def patch_kwargs(val=None, exception=None):
+    if hasattr(unittest.mock, 'AsyncMock'):
+        # Python 3.8+ does what you mean when patch()ing an async function,
+        # so you don't have to return an awaitable.
+        return {
+            'return_value': val,
+            'side_effect': exception,
+        }
+    # Older python don't have AsyncMock, so do what we used to do,
+    # return a promise that will be either a value or an exception.
+    return {
+        'return_value': promise(val, exception),
+    }
