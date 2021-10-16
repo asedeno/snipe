@@ -49,7 +49,7 @@ import ssl
 import sys
 import time
 import unicodedata
-import unittest.mock as mock
+import mock
 import urllib.parse
 import zlib
 

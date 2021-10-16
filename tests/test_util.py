@@ -46,7 +46,7 @@ import unittest
 import zlib
 
 from typing import (Dict)
-from unittest.mock import (patch)
+from mock import (patch)
 
 import wsproto
 

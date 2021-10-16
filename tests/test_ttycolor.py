@@ -35,7 +35,7 @@ Unit tests for tty color infrastructure
 
 import unittest
 
-from unittest.mock import (patch)
+from mock import (patch)
 
 import mocks
 

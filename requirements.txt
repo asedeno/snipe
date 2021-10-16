@@ -5,3 +5,5 @@ Markdown < 3.3
 parsedatetime
 ply
 wsproto
+mock
+types-mock

@@ -36,7 +36,7 @@ import inspect
 import os
 import unittest
 
-from unittest.mock import (Mock)
+from mock import (Mock)
 from typing import (TYPE_CHECKING)
 
 import snipe.interactive as interactive  # noqa: F401

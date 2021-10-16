@@ -36,5 +36,7 @@ roost (https://github.com/roost-im).""",
         'parsedatetime',
         'ply',
         'wsproto',
+        'mock',
+        'types-mock',
         ]
 )

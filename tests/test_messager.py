@@ -40,7 +40,7 @@ import os
 import re
 import unittest
 
-from unittest.mock import (patch)
+from mock import (patch)
 
 import mocks
 

@@ -35,7 +35,7 @@ Unit tests for irccloud backend
 import os
 import unittest
 
-from unittest.mock import (patch, Mock)
+from mock import (patch, Mock)
 
 import mocks
 

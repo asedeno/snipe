@@ -37,7 +37,6 @@ Unit tests for the TTY frontend objects
 
 import curses
 import unittest
-import unittest.mock
 
 import mocks
 

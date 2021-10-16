@@ -40,7 +40,7 @@ import random
 import re
 import unittest
 
-from unittest.mock import (Mock, patch)
+from mock import (Mock, patch)
 
 import mocks
 

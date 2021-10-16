@@ -39,7 +39,7 @@ Editor subclass for a python REPL
 
 import bisect
 import sys
-import unittest.mock as mock
+import mock
 
 from . import editor
 from . import interactive

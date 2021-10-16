@@ -35,10 +35,9 @@ Unit tests for context code
 import os
 import logging
 import unittest
-import unittest.mock
 import tempfile
 
-from unittest.mock import (patch, Mock)
+from mock import (patch, Mock)
 
 import snipe.context as context
 import snipe.imbroglio as imbroglio
