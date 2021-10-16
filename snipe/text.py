@@ -41,7 +41,7 @@ import xml.dom.minidom
 
 import docutils.io
 import docutils.parsers.rst
-import docutils.parsers.rst.directives
+import docutils.parsers.rst.directives  # type:ignore
 import docutils.nodes
 import markdown
 import markdown.extensions
