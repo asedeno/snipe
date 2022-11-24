@@ -44,6 +44,7 @@ import pwd
 import random
 import re
 import shlex
+import sys
 import time
 import traceback
 import unicodedata
@@ -541,6 +542,16 @@ class Roost(messages.SnipeBackend):
 class RoostMessage(messages.SnipeMessage):
     def __init__(self, backend, m):
         super().__init__(backend, m['message'], m['receiveTime'] / 1000)
+
+        _INTERNED_KEYS = (
+            'class', 'classKey', 'classKeyBase', 'conversation',
+            'instance', 'instanceKey', 'instanceKeyBase', 'opcode',
+            'recipient', 'sender', 'signature',
+        )
+        for key in _INTERNED_KEYS:
+            if isinstance(m.get(key), str):
+                m[key] = sys.intern(m[key])
+
         self.data = m
         self._sender = RoostPrincipal(backend, m['sender'])
 
