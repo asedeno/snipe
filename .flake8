@@ -24,3 +24,4 @@ ignore =
     E741
     # flake8 3.6.0 thinks there should be spaces around parameter =?
     E252
+max-line-length = 80
