@@ -79,6 +79,10 @@ class Rooster(util.HTTP_JSONmixin):
         self.tailid = 0
         self.log = logging.getLogger('Rooster.%x' % (id(self),))
         self.setup_client_session()
+        self.websocket = None
+        self.websocket_messages = []
+        self.backfilled = imbroglio.Event()
+        self.is_loaded = imbroglio.Event()
 
     async def credentials(self):
         return await imbroglio.run_in_thread(get_zephyr_creds, self.realm)
@@ -208,6 +212,20 @@ class Rooster(util.HTTP_JSONmixin):
             count=limit,
             ))
 
+    async def ws_messages(self, offset, limit, reverse=True, inclusive=False):
+        if self.websocket:
+            self.backfilled.clear()
+            if not offset:
+                offset = ''
+            payload = dict(
+                type='get-messages',
+                reverse=1 if reverse else 0,
+                inclusive=1 if inclusive else 0,
+                offset=offset,
+                count=limit,
+            )
+            await self.websocket.write(payload)
+
     async def newmessages(
             self, coro, startid=None, pingfrequency=5, connected_coro=None):
         # will coincidentally ensure_auth
@@ -271,6 +289,8 @@ class Rooster(util.HTTP_JSONmixin):
 
                 if state == 'start':
                     assert m['type'] == 'ready'
+                    self.websocket_messages = m.get('msgs', [])
+                    self.websocket = ws
                     self.log.debug('authed, starting tail %d', tailid)
                     await ws.write({
                         'type': 'new-tail',
@@ -289,17 +309,24 @@ class Rooster(util.HTTP_JSONmixin):
                         self.log.debug('pong')
                         state = 'pong'
                     elif m['type'] == 'messages':
-                        msgcount += 1
-                        await ws.write({
-                            'type': 'extend-tail',
-                            'id': tailid,
-                            'count': msgcount,
+                        if m.get('id') == tailid:
+                            msgcount += 1
+                            await ws.write({
+                                'type': 'extend-tail',
+                                'id': tailid,
+                                'count': msgcount,
                             })
                         for msg in m['messages']:
                             await coro(msg)
+
+                        if m.get('id') != tailid:
+                            if m['isDone']:
+                                await self.is_loaded.set()
+                            await self.backfilled.set()
                     else:
                         self.log.debug('unknown message type: %s', repr(m))
         finally:
+            self.websocket = None
             await ws.close()
 
 

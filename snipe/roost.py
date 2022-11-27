@@ -389,33 +389,42 @@ class Roost(messages.SnipeBackend):
                     self.log.debug('no more messages to backfill')
                     return
                 self.log.debug('backfilling')
-                chunk = await self.r.messages(start, self.chunksize)
+                if 'get-messages' in self.r.websocket_messages:
+                    await self.r.ws_messages(start, self.chunksize)
+                    await self.r.backfilled.wait()
+                    if self.r.is_loaded.is_set():
+                        self.log.info('IT IS DONE.')
+                        self.loaded = True
+                else:
+                    chunk = await self.r.messages(start, self.chunksize)
 
-                if chunk['isDone']:
-                    self.log.info('IT IS DONE.')
-                    self.loaded = True
-                ms = []
-                for m in chunk['messages']:
-                    cm = await self.construct_and_maybe_decrypt(m)
-                    ms.append(cm)
-                count += len([m for m in ms if mfilter(m)])
-                self.messages.update(ms)
-                self.drop_cache()
-                self.log.debug(
-                    '%d messages, total %d, earliest %s',
-                    count,
-                    len(self.messages),
-                    util.timestr(
-                        self.messages[0].time) if self.messages else '-')
+                    if chunk['isDone']:
+                        self.log.info('IT IS DONE.')
+                        self.loaded = True
+                    ms = []
+                    for m in chunk['messages']:
+                        cm = await self.construct_and_maybe_decrypt(m)
+                        ms.append(cm)
+                    count += len([m for m in ms if mfilter(m)])
+                    self.messages.update(ms)
+                    self.drop_cache()
+                    self.log.debug(
+                        '%d messages, total %d, earliest %s',
+                        count,
+                        len(self.messages),
+                        util.timestr(
+                            self.messages[0].time) if self.messages else '-')
 
                 # and (maybe) circle around
                 await imbroglio.sleep(.1)
                 self.backfill(mfilter, target, count=count, origin=origin)
 
-                if ms:
-                    self.redisplay(ms[0], ms[-1])
-                else:
-                    self.redisplay(None, None)
+                if 'get-messages' not in self.r.websocket_messages:
+                    if ms:
+                        self.redisplay(ms[0], ms[-1])
+                    else:
+                        self.redisplay(None, None)
+
                 self.log.debug('done backfilling')
             finally:
                 self.state_set(messages.BackendState.IDLE)
