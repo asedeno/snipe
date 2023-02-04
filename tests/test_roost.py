@@ -153,12 +153,6 @@ class TestRoost(unittest.TestCase):
         r.drop_cache.assert_called()
         r.redisplay.assert_called_with(m, m)
 
-        m = messages.SnipeMessage(r, 'bar', 1.0)
-        r.add_message(m)
-
-        self.assertEqual(2, len(r.messages))
-        self.assertEqual(1.00001, r.messages[-1].time)
-
     @imbroglio.test
     async def test_construct_and_maybe_decrypt(self):
         r = roost.Roost(mocks.Context())

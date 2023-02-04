@@ -49,6 +49,8 @@ import time
 import traceback
 import unicodedata
 
+import sortedcontainers         # type: ignore
+
 from . import _rooster
 from . import chunks
 from . import filters
@@ -109,7 +111,7 @@ class Roost(messages.SnipeBackend):
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self.messages = []
+        self.messages = sortedcontainers.SortedSet()
         self.r = _rooster.Rooster(self.url, self.service_name, self.realm)
         self.chunksize = 128
         self.loaded = False
@@ -288,9 +290,7 @@ class Roost(messages.SnipeBackend):
         await imbroglio.switch()
 
     def add_message(self, msg):
-        if self.messages and msg.time <= self.messages[-1].time:
-            msg.time = self.messages[-1].time + .00001
-        self.messages.append(msg)
+        self.messages.add(msg)
         self.drop_cache()
         self.redisplay(msg, msg)
 
@@ -399,18 +399,7 @@ class Roost(messages.SnipeBackend):
                     cm = await self.construct_and_maybe_decrypt(m)
                     ms.append(cm)
                 count += len([m for m in ms if mfilter(m)])
-                # Make sure ordering is stable
-                # XXX really assuming messages are millisecond unique si dumb
-                anchor = []
-                if self.messages and ms:
-                    anchor = [(self.messages[0], ms[0])]
-                for (nextmsg, prevmsg) in itertools.chain(
-                        anchor, zip(ms, ms[1:])):
-                    # walking backwards through time
-                    if nextmsg.time == prevmsg.time:
-                        prevmsg.time = nextmsg.time - .00001
-                ms.reverse()
-                self.messages = ms + self.messages
+                self.messages.update(ms)
                 self.drop_cache()
                 self.log.debug(
                     '%d messages, total %d, earliest %s',
@@ -578,6 +567,12 @@ class RoostMessage(messages.SnipeMessage):
             body=self.body
                 + ('' if self.body and self.body[-1] == '\n' else '\n'),
             )
+
+    def _msg_key(self):
+        yield from super()._msg_key()
+        yield self.backend.url
+        yield self.backend.realm
+        yield self.data['id']
 
     class_un = re.compile(r'^(un)*')
     class_dotd = re.compile(r'(\.d)*$')

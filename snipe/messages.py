@@ -164,10 +164,31 @@ class SnipeMessage:
             return other  # probably will fail :-)
 
     def __eq__(self, other):
+        if isinstance(other, SnipeMessage):
+            return all(x == y
+                       for x, y in zip(self._msg_key(), other._msg_key()))
+
         return self.time == self._coerce(other)
 
     def __lt__(self, other):
+        if isinstance(other, SnipeMessage):
+            for x, y in zip(self._msg_key(), other._msg_key()):
+                if x == y:
+                    # this key is the same; check the next one
+                    continue
+                return x < y
+            # all keys the same; not lt, but eq
+            return False
+
         return self.time < self._coerce(other)
+
+    def _msg_key(self):
+        # Basic messages are the same if their timestamp and backend are
+        # the same. Backends SHOULD add additional attributes for comparison.
+        # subclasses overriding this function MUST begin with:
+        # yield from super()._msg_key()
+        yield self.time
+        yield self.backend
 
     def reply(self):
         return self.sender.reply()
