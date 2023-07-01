@@ -41,6 +41,7 @@ import logging
 import weakref
 import array
 
+ATYPE = 'w' if 'w' in array.typecodes else 'u'
 
 class GapBuffer:
     CHUNKSIZE = 4096
@@ -66,7 +67,7 @@ class GapBuffer:
             )
 
     def _array(self, size):
-        return array.array('u', u' ' * size)
+        return array.array(ATYPE, ' ' * size)
 
     @property
     def size(self):
@@ -158,7 +159,7 @@ class GapBuffer:
         self.movegap(where, length - size)
         self.gapend += size
         newstart = self.gapstart + length
-        self.buf[self.gapstart:newstart] = array.array('u', string)
+        self.buf[self.gapstart:newstart] = array.array(ATYPE, string)
         self.gapstart = newstart
         return length
 

@@ -114,7 +114,7 @@ class TestGapBuffer(unittest.TestCase):
             u'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
         g = snipe.gap.GapBuffer()
-        a = array.array('u')
+        a = array.array(snipe.gap.ATYPE)
         for n in range(iterations):
             pos = g.size and random.randint(0, g.size-1)
             # A 1 in 3 chance to delete, unless we're at max length,
