@@ -43,6 +43,7 @@ import array
 
 ATYPE = 'w' if 'w' in array.typecodes else 'u'
 
+
 class GapBuffer:
     CHUNKSIZE = 4096
 

@@ -525,7 +525,7 @@ def _setup_wcwidth():
         libc = ctypes.CDLL(LIBC)
         os_wcwidth = libc.wcwidth
 
-        def wcwidth(c):
+        def wcwidth(c):  # noqa: F811
             return max(os_wcwidth(ord(c)), 0)
     except (OSError, AttributeError):  # pragma: nocover
         pass
