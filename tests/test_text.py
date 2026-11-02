@@ -175,7 +175,7 @@ class TestMarkdownXHTMLChunk(unittest.TestCase):
         xhtml = text.markdown_to_xhtml(input)
         self.assertEqual(
             xhtml,
-            '<p>foo</p>\n<blockquote>\n<p>bar</p>\n</blockquote>\n\n'
+            '<p>foo</p>\n<blockquote>\n<p>bar</p>\n</blockquote>\n'
             '<p>baz</p>')
 
 
