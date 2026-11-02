@@ -184,7 +184,7 @@ class TestWindow(unittest.TestCase):
             except StopIteration as stop:
                 val = stop.value
 
-        self.assertEquals(val, 'foo')
+        self.assertEqual(val, 'foo')
 
         with mocks.mocked_up_actual_fe(window.Window) as fe:
             i = fe.windows[0].window.read_string(': ', height=5)
@@ -206,7 +206,7 @@ class TestWindow(unittest.TestCase):
             except StopIteration as stop:
                 val = stop.value
 
-        self.assertEquals(val, 'foo')
+        self.assertEqual(val, 'foo')
 
     def test_read_keyseq(self):
         import snipe.prompt as prompt
@@ -222,14 +222,14 @@ class TestWindow(unittest.TestCase):
             except StopIteration as stop:
                 val = stop.value
 
-        self.assertEquals(val, 'foo')
+        self.assertEqual(val, 'foo')
 
     def test_show(self):
         with mocks.mocked_up_actual_fe(window.Window) as fe:
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.show('foo')
-            self.assertEquals(len(fe.windows), 2)
-            self.assertEquals(
+            self.assertEqual(len(fe.windows), 2)
+            self.assertEqual(
                 ''.join(
                     str(chunk)
                     for (mark, chunk) in fe.windows[1].window.view(0)),
@@ -254,44 +254,44 @@ class TestWindow(unittest.TestCase):
         import snipe.messager as messager
         import snipe.repl as repl
         with mocks.mocked_up_actual_fe(window.Window) as fe:
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_window()
-            self.assertEquals(len(fe.windows), 2)
+            self.assertEqual(len(fe.windows), 2)
             fe.windows[0].window.delete_window()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_window()
-            self.assertEquals(len(fe.windows), 2)
+            self.assertEqual(len(fe.windows), 2)
             fe.windows[0].window.delete_other_windows()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_window()
-            self.assertEquals(len(fe.windows), 2)
-            self.assertEquals(fe.output, 0)
+            self.assertEqual(len(fe.windows), 2)
+            self.assertEqual(fe.output, 0)
             fe.windows[0].window.other_window()
-            self.assertEquals(fe.output, 1)
+            self.assertEqual(fe.output, 1)
             fe.windows[0].window.delete_other_windows()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_to_editor()
-            self.assertEquals(len(fe.windows), 2)
-            self.assertEquals(fe.output, 1)
+            self.assertEqual(len(fe.windows), 2)
+            self.assertEqual(fe.output, 1)
             self.assertIsInstance(fe.windows[1].window, editor.Editor)
             fe.windows[1].window.delete_window()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
 
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_to_messager()
-            self.assertEquals(len(fe.windows), 2)
-            self.assertEquals(fe.output, 1)
+            self.assertEqual(len(fe.windows), 2)
+            self.assertEqual(fe.output, 1)
             self.assertIsInstance(fe.windows[1].window, messager.Messager)
             fe.windows[1].window.delete_window()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
 
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
             fe.windows[0].window.split_to_repl()
-            self.assertEquals(len(fe.windows), 2)
-            self.assertEquals(fe.output, 1)
+            self.assertEqual(len(fe.windows), 2)
+            self.assertEqual(fe.output, 1)
             self.assertIsInstance(fe.windows[1].window, repl.REPL)
             fe.windows[1].window.delete_window()
-            self.assertEquals(len(fe.windows), 1)
+            self.assertEqual(len(fe.windows), 1)
 
 
 class TestStatusLine(unittest.TestCase):
