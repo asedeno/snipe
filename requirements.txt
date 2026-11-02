@@ -1,7 +1,7 @@
 docutils
 types-docutils
 h11
-Markdown >= 3.4
+Markdown >= 3.4.1
 parsedatetime
 ply
 wsproto
