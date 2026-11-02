@@ -32,8 +32,10 @@
 Unit tests for roost backend
 '''
 
+import errno
 import io
 import os
+import socket
 import unittest
 
 from mock import (patch, Mock)
@@ -373,6 +375,63 @@ class TestRoost(unittest.TestCase):
             ('unununa.d.d', '*', ''),
             ('unununa.d.d.d', '*', ''),
             ])
+
+    def test_network_error(self):
+        for exc in (
+                OSError(errno.EHOSTUNREACH, 'No route to host'),
+                OSError(errno.ENETUNREACH, 'Network is unreachable'),
+                ConnectionRefusedError(),
+                TimeoutError(),
+                socket.gaierror(socket.EAI_NONAME, 'unknown')):
+            self.assertTrue(roost.network_error(exc), repr(exc))
+        for exc in (
+                OSError(errno.ENOENT, 'No such file or directory'),
+                ValueError('foo'),
+                Exception('User does not exist')):
+            self.assertFalse(roost.network_error(exc), repr(exc))
+
+    @imbroglio.test
+    async def test_new_messages_server_unreachable(self):
+        r = roost.Roost(mocks.Context())
+        r.context.ui = Mock()
+        r.add_message = Mock()
+        calls = 0
+
+        async def newmessages(*args, **kw):
+            nonlocal calls
+            calls += 1
+            if calls <= 3:
+                raise OSError(errno.EHOSTUNREACH, 'No route to host')
+            raise Exception('something else')
+
+        delays = []
+
+        async def sleep(delay):
+            delays.append(delay)
+
+        r.r.newmessages = newmessages
+        with patch.object(roost.imbroglio, 'sleep', sleep):
+            await r.new_messages()
+
+        self.assertEqual(4, calls)
+        self.assertEqual([10, 20, 40], delays)  # backs off
+        bodies = [c[0][0].body for c in r.add_message.call_args_list]
+        # told once about the outage, then the unrelated error ends the task
+        self.assertEqual(2, len(bodies))
+        self.assertIn('cannot reach', bodies[0])
+        self.assertIn('No route to host', bodies[0])
+        self.assertIn('something else', bodies[1])
+        self.assertFalse(r.connected)
+
+    @imbroglio.test
+    async def test_state_connected_resets_backoff(self):
+        r = roost.Roost(mocks.Context())
+        r.context.ui = Mock()
+        r.retry_delay = 160
+        r.reported_down = True
+        await r.state_connected()
+        self.assertEqual(roost.Roost.RETRY_MIN, r.retry_delay)
+        self.assertFalse(r.reported_down)
 
     @imbroglio.test
     async def test_reconnect(self):

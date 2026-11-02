@@ -36,6 +36,7 @@ Backend for talking to `roost <https://github.com/roost-im>`_
 
 import codecs
 import contextlib
+import errno
 import getopt
 import inspect
 import itertools
@@ -44,6 +45,7 @@ import pwd
 import random
 import re
 import shlex
+import socket
 import sys
 import time
 import traceback
@@ -65,8 +67,22 @@ from . import zcode
 _backend = 'Roost'
 
 
+NETWORK_DOWN = {
+    errno.EHOSTUNREACH, errno.ENETUNREACH, errno.ENETDOWN, errno.EHOSTDOWN}
+
+
+def network_error(exc):
+    """Is this the server being unreachable, as opposed to a bug?"""
+    if isinstance(exc, (ConnectionError, TimeoutError, socket.gaierror)):
+        return True
+    return isinstance(exc, OSError) and exc.errno in NETWORK_DOWN
+
+
 class Roost(messages.SnipeBackend):
     name = 'roost'
+
+    RETRY_MIN = 10  # seconds between tries when the server is unreachable
+    RETRY_MAX = 300
 
     backfill_count = util.Configurable(
         'roost.backfill_count', 8,
@@ -112,6 +128,8 @@ class Roost(messages.SnipeBackend):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.messages = sortedcontainers.SortedSet()
+        self.retry_delay = self.RETRY_MIN
+        self.reported_down = False
         self.r = _rooster.Rooster(self.url, self.service_name, self.realm)
         self.chunksize = 128
         self.loaded = False
@@ -136,6 +154,7 @@ class Roost(messages.SnipeBackend):
                 start = None
 
             errmsg = None
+            down = None
             activity = 'getting new messages from %s' % self.url
             try:
                 self.connected = True  # XXX kinda racy?
@@ -154,13 +173,31 @@ class Roost(messages.SnipeBackend):
                     await imbroglio.sleep(e.wait)
                 continue
             except Exception as exc:
-                errmsg = str(exc)
-                snipe_exception = isinstance(exc, util.SnipeException)
-                self.log.exception(activity)
-                tb = traceback.format_exc()
+                if network_error(exc):
+                    down = exc
+                else:
+                    errmsg = str(exc)
+                    snipe_exception = isinstance(exc, util.SnipeException)
+                    self.log.exception(activity)
+                    tb = traceback.format_exc()
             finally:
                 self.state_set(messages.BackendState.DISCONNECTED)
                 self.connected = False
+
+            if down is not None:
+                # the server is unreachable: say so once, back off, try again
+                delay = self.retry_delay
+                self.retry_delay = min(2 * delay, self.RETRY_MAX)
+                msg = '%s: cannot reach %s (%s); retrying in %ds' % (
+                    self.name, self.url, down, delay)
+                self.log.warning(msg)
+                self.context.message(msg)
+                if not self.reported_down:
+                    self.reported_down = True
+                    self.add_message(messages.SnipeMessage(
+                        self, msg + ' (and every so often after that)'))
+                await imbroglio.sleep(delay)
+                continue
 
             if errmsg is None:
                 pass
@@ -174,6 +211,8 @@ class Roost(messages.SnipeBackend):
                 return
 
     async def state_connected(self):
+        self.retry_delay = self.RETRY_MIN
+        self.reported_down = False
         self.state_set(messages.BackendState.IDLE)
 
     async def new_registration(self):
