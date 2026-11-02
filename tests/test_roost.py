@@ -393,6 +393,7 @@ class TestRoost(unittest.TestCase):
     @imbroglio.test
     async def test_new_messages_server_unreachable(self):
         r = roost.Roost(mocks.Context())
+        r.context.ui = Mock()
         r.add_message = Mock()
         calls = 0
 
@@ -425,6 +426,7 @@ class TestRoost(unittest.TestCase):
     @imbroglio.test
     async def test_state_connected_resets_backoff(self):
         r = roost.Roost(mocks.Context())
+        r.context.ui = Mock()
         r.retry_delay = 160
         r.reported_down = True
         await r.state_connected()
