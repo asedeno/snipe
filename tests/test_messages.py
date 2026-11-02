@@ -284,8 +284,8 @@ class TestBackend(unittest.TestCase):
 class TestInfoMessage(unittest.TestCase):
     def test(self):
         m = messages.InfoMessage(None, 'foo')
-        self.assertEquals(str(m), 'foo')
-        self.assertEquals(m.display({}), [({'bold'}, 'foo')])
+        self.assertEqual(str(m), 'foo')
+        self.assertEqual(m.display({}), [({'bold'}, 'foo')])
 
 
 class TestDateBackend(unittest.TestCase):
@@ -313,7 +313,7 @@ class TestDateBackend(unittest.TestCase):
 
 class TestMerge(unittest.TestCase):
     def test(self):
-        self.assertEquals(
+        self.assertEqual(
             list(messages.merge([
                 [1, 3, 5],
                 [2, 3, 4, 6, 8],

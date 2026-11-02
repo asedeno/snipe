@@ -466,17 +466,17 @@ class TestNetworkStream(unittest.TestCase):
                 socket.create_connection, MockCreateConnection)
             ns = await snipe.util.NetworkStream.connect('foo', 80)
             await ns.write(b'foo')
-            self.assertEquals(b'foo', mc.left.recv(4096))
+            self.assertEqual(b'foo', mc.left.recv(4096))
 
             mc.left.send(b'bar')
             self.assertTrue(await ns.readable())
-            self.assertEquals(b'bar', (await ns.readsome()))
+            self.assertEqual(b'bar', (await ns.readsome()))
 
             mc.left.shutdown(socket.SHUT_RDWR)
             mc.left.close()
-            self.assertEquals(None, (await ns.readsome()))
+            self.assertEqual(None, (await ns.readsome()))
             self.assertFalse(await ns.readable())
-            self.assertEquals(None, (await ns.readsome()))
+            self.assertEqual(None, (await ns.readsome()))
 
             await ns.close()
             with self.assertRaises(OSError):

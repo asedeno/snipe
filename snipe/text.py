@@ -34,6 +34,7 @@ Text processing stuff.
 '''
 
 
+import html
 import logging
 import re
 import sys
@@ -47,6 +48,7 @@ import markdown
 import markdown.extensions
 import markdown.extensions.codehilite
 import markdown.extensions.fenced_code
+import markdown.postprocessors
 
 from . import chunks
 from . import util
@@ -463,7 +465,8 @@ def xhtml_to_chunk(xhtml):
 
 def markdown_to_xhtml(s):
     return markdown.markdown(
-        s, safe_mode='escape', extensions=[
+        s, extensions=[
+            EscapeHTMLExtension(),
             SnipeFencedCodeExtension(),
             'markdown.extensions.nl2br',
             # 'markdown.extensions.tables',
@@ -474,28 +477,44 @@ def markdown_to_chunk(s):
     return xhtml_to_chunk(markdown_to_xhtml(s))
 
 
-class QuoteHack:
-    CODE_WRAP = '<pre><code%s>%s</code></pre>'
+class EscapeHTMLExtension(markdown.Extension):  # type:ignore
+    """Show raw HTML in the source as text.
 
-    def __mod__(self, other):
-        langtag, content = other
-        if langtag.lower() not in (' class="quote"', ' class="quoted"'):
-            return self.CODE_WRAP % (langtag, content)
-        return (
-            '<blockquote>\n' + markdown_to_xhtml(content) + '\n</blockquote>')
+    What safe_mode='escape' did before Markdown removed it.
+    """
+    def extendMarkdown(self, md):
+        md.preprocessors.deregister('html_block')
+        md.inlinePatterns.deregister('html')
 
 
-class SnipeFBP(markdown.extensions.fenced_code.FencedBlockPreprocessor):
-    CODE_WRAP = QuoteHack()  # type: ignore
+class QuotePostprocessor(
+        markdown.postprocessors.Postprocessor):  # type:ignore
+    """Turn fenced blocks tagged .quote or .quoted into a <blockquote>.
+
+    The block's contents are rendered as markdown themselves.
+    """
+    QUOTE_RE = re.compile(
+        r'<pre><code class="quoted?">(.*?)</code></pre>',
+        re.DOTALL | re.IGNORECASE)
+
+    def run(self, text):
+        return self.QUOTE_RE.sub(
+            lambda m: (
+                '<blockquote>\n'
+                + markdown_to_xhtml(html.unescape(m.group(1)))
+                + '\n</blockquote>'),
+            text)
 
 
 class SnipeFencedCodeExtension(markdown.Extension):  # type:ignore
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         md.registerExtension(self)
-        md.preprocessors.add(
-            'fenced_code_block',
-            SnipeFBP(md),
-            ">normalize_whitespace")
+        # lang_prefix='' keeps the old <code class="python"> form, which is
+        # also what QuotePostprocessor looks for.
+        markdown.extensions.fenced_code.FencedCodeExtension(
+            lang_prefix='').extendMarkdown(md)
+        # after raw html has been put back (priority 30)
+        md.postprocessors.register(QuotePostprocessor(md), 'snipe_quote', 25)
 
 
 # using \x0b (VT) as a soft newline

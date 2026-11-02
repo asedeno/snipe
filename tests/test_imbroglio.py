@@ -389,7 +389,7 @@ class TestImbroglioCore(unittest.TestCase):
         async def driver():
             t = await imbroglio.spawn(quick())
             await t
-            self.assertEquals((False, 0.0), (await imbroglio.taskwait(t)))
+            self.assertEqual((False, 0.0), (await imbroglio.taskwait(t)))
 
         imbroglio.run(driver())
 
